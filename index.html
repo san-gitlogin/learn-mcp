@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP — The Fun Way</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --card: #161b22;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --text-dim: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --orange: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+  --pink: #f778ba;
+  --yellow: #e3b341;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; }
+
+.hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(88,166,255,0.08) 0%, transparent 70%); top: -100px; left: -100px; animation: floatBlob 20s ease-in-out infinite; }
+.hero::after { content: ''; position: absolute; width: 500px; height: 500px; background: radial-gradient(circle, rgba(188,140,255,0.06) 0%, transparent 70%); bottom: -100px; right: -100px; animation: floatBlob 25s ease-in-out infinite reverse; }
+@keyframes floatBlob { 0%, 100% { transform: translate(0, 0); } 33% { transform: translate(50px, -30px); } 66% { transform: translate(-30px, 50px); } }
+.hero h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.5rem; position: relative; z-index: 1; }
+.hero h1 span { color: var(--accent); }
+.hero .subtitle { font-family: 'Caveat', cursive; font-size: 1.6rem; color: var(--orange); margin-bottom: 2rem; position: relative; z-index: 1; }
+.hero .start-btn { background: var(--accent); color: #000; border: none; padding: 1rem 3rem; font-size: 1.1rem; font-weight: 600; font-family: 'Outfit', sans-serif; border-radius: 50px; cursor: pointer; position: relative; z-index: 1; transition: transform 0.2s, box-shadow 0.2s; }
+.hero .start-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(88,166,255,0.3); }
+
+.progress-bar { position: fixed; top: 0; left: 0; height: 4px; background: linear-gradient(90deg, var(--accent), var(--purple), var(--pink)); z-index: 999; transition: width 0.5s ease; }
+.lesson { max-width: 780px; margin: 0 auto; padding: 3rem 2rem; display: none; animation: fadeUp 0.5s ease; }
+.lesson.active { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+.lesson-number { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem; }
+.lesson h2 { font-size: 2rem; font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+.lesson h2 .emoji { margin-right: 0.3rem; }
+.lesson h3 { color: #fff; }
+
+.story { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; position: relative; }
+.story::before { content: attr(data-label); position: absolute; top: -12px; left: 20px; background: var(--bg); padding: 0 10px; font-family: 'Caveat', cursive; font-size: 1.1rem; color: var(--orange); }
+
+.analogy { background: linear-gradient(135deg, rgba(88,166,255,0.08), rgba(188,140,255,0.08)); border-left: 4px solid var(--purple); border-radius: 0 12px 12px 0; padding: 1.5rem 2rem; margin: 1.5rem 0; font-size: 1.05rem; }
+.analogy .label { font-family: 'Caveat', cursive; font-size: 1.3rem; color: var(--purple); margin-bottom: 0.3rem; }
+
+.code-block { background: #0d1117; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; overflow-x: auto; position: relative; }
+.code-block .lang-tag { position: absolute; top: 8px; right: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+.code-block pre { font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; line-height: 1.8; color: var(--text); white-space: pre; }
+.comment { color: var(--text-dim); }
+.keyword { color: var(--purple); }
+.string { color: #a5d6ff; }
+.decorator { color: var(--orange); }
+.func { color: #d2a8ff; }
+.param { color: var(--pink); }
+
+.quiz-box { background: var(--card); border: 2px solid var(--border); border-radius: 16px; padding: 2rem; margin: 2rem 0; }
+.quiz-box h3 { font-family: 'Caveat', cursive; font-size: 1.5rem; color: var(--yellow); margin-bottom: 1rem; }
+.quiz-option { display: block; width: 100%; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.5rem; margin: 0.5rem 0; color: var(--text); font-family: 'Outfit', sans-serif; font-size: 1rem; cursor: pointer; text-align: left; transition: all 0.2s; }
+.quiz-option:hover { border-color: var(--accent); background: rgba(88,166,255,0.05); }
+.quiz-option.correct { border-color: var(--green); background: rgba(63,185,80,0.1); color: var(--green); }
+.quiz-option.wrong { border-color: var(--red); background: rgba(248,81,73,0.1); color: var(--red); }
+.quiz-option:disabled { cursor: default; opacity: 0.7; }
+.quiz-result { margin-top: 1rem; padding: 1rem 1.5rem; border-radius: 10px; font-weight: 600; display: none; }
+.quiz-result.show { display: block; }
+.quiz-result.pass { background: rgba(63,185,80,0.1); color: var(--green); }
+.quiz-result.fail { background: rgba(248,81,73,0.1); color: var(--red); }
+
+.versus { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+.versus > div { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+.versus > div h4 { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.8rem; }
+
+.nav-buttons { display: flex; justify-content: space-between; padding: 2rem 0 4rem; }
+.nav-btn { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 0.8rem 2rem; font-family: 'Outfit', sans-serif; font-size: 1rem; border-radius: 50px; cursor: pointer; transition: all 0.2s; }
+.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.nav-btn.primary { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+.nav-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(88,166,255,0.3); }
+
+.mental-model { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+.mental-model .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center; transition: transform 0.2s; }
+.mental-model .card:hover { transform: translateY(-4px); }
+.mental-model .card .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.mental-model .card h4 { font-size: 1rem; margin-bottom: 0.3rem; }
+.mental-model .card p { font-size: 0.85rem; color: var(--text-dim); }
+.mental-model .card .who { font-family: 'Caveat', cursive; font-size: 1.1rem; margin-top: 0.5rem; }
+.card-tool .who { color: var(--accent); }
+.card-resource .who { color: var(--green); }
+.card-prompt .who { color: var(--orange); }
+
+.tip { background: rgba(227,179,65,0.08); border-left: 4px solid var(--yellow); border-radius: 0 10px 10px 0; padding: 1rem 1.5rem; margin: 1.5rem 0; font-size: 0.95rem; }
+.tip strong { color: var(--yellow); }
+.recall { background: rgba(88,166,255,0.06); border-left: 4px solid var(--accent); border-radius: 0 10px 10px 0; padding: 1rem 1.5rem; margin: 1.5rem 0; font-size: 0.95rem; }
+.recall strong { color: var(--accent); }
+
+.line-explain { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin: 1rem 0 1.5rem; }
+.line-explain .le-row { display: flex; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: flex-start; }
+.line-explain .le-row:last-child { border-bottom: none; }
+.line-explain .le-line { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); min-width: 220px; flex-shrink: 0; }
+.line-explain .le-desc { font-size: 0.9rem; color: var(--text-dim); }
+
+mark { background: rgba(88,166,255,0.15); color: var(--accent); padding: 0.1em 0.3em; border-radius: 4px; }
+
+.score-badge { position: fixed; top: 20px; right: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 50px; padding: 0.5rem 1.2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; z-index: 100; display: none; }
+.score-badge span { color: var(--yellow); font-weight: 700; }
+
+.interactive-diagram { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; text-align: center; }
+.diagram-row { display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin: 0.8rem 0; flex-wrap: wrap; }
+.diagram-box { padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: default; transition: transform 0.2s; }
+.diagram-box:hover { transform: scale(1.05); }
+.diagram-box.you { background: rgba(88,166,255,0.15); border: 1px solid var(--accent); color: var(--accent); }
+.diagram-box.client { background: rgba(63,185,80,0.15); border: 1px solid var(--green); color: var(--green); }
+.diagram-box.server { background: rgba(188,140,255,0.15); border: 1px solid var(--purple); color: var(--purple); }
+.diagram-box.external { background: rgba(247,120,186,0.15); border: 1px solid var(--pink); color: var(--pink); }
+.diagram-arrow { color: var(--text-dim); font-size: 1.2rem; }
+
+.build-step { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin: 1rem 0; position: relative; padding-left: 4rem; }
+.build-step .step-num { position: absolute; left: 1rem; top: 1.2rem; width: 2rem; height: 2rem; background: var(--accent); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; }
+.build-step h4 { margin-bottom: 0.3rem; }
+.build-step p { color: var(--text-dim); font-size: 0.95rem; }
+
+.flow-vis { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem 2rem; margin: 1.5rem 0; }
+.flow-vis .fv-step { display: flex; align-items: flex-start; gap: 1rem; padding: 0.8rem 0; position: relative; }
+.flow-vis .fv-step:not(:last-child)::after { content: ''; position: absolute; left: 15px; top: 2.8rem; width: 2px; height: calc(100% - 1.5rem); background: var(--border); }
+.flow-vis .fv-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0; }
+.flow-vis .fv-num.srv { background: rgba(188,140,255,0.2); color: var(--purple); }
+.flow-vis .fv-num.cli { background: rgba(63,185,80,0.2); color: var(--green); }
+.flow-vis .fv-num.api { background: rgba(247,120,186,0.2); color: var(--pink); }
+.flow-vis .fv-text { font-size: 0.95rem; padding-top: 0.3rem; }
+.flow-vis .fv-text strong { color: #fff; }
+
+.curated-section { text-align: center; padding: 3rem 2rem 4rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+.curated-section .curated-label { font-family: 'Caveat', cursive; font-size: 1.2rem; color: var(--text-dim); margin-bottom: 0.3rem; }
+.curated-section .curated-name { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; margin-bottom: 1rem; }
+.curated-section .social-links { display: flex; align-items: center; justify-content: center; gap: 1.5rem; }
+.curated-section .social-links a { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-dim); text-decoration: none; font-size: 0.95rem; padding: 0.5rem 1.2rem; border: 1px solid var(--border); border-radius: 50px; transition: all 0.2s; }
+.curated-section .social-links a:hover { color: var(--accent); border-color: var(--accent); background: rgba(88,166,255,0.05); }
+.curated-section .social-links a svg { width: 18px; height: 18px; fill: currentColor; }
+
+@media (max-width: 600px) {
+  .mental-model { grid-template-columns: 1fr; }
+  .versus { grid-template-columns: 1fr; }
+  .line-explain .le-row { flex-direction: column; gap: 0.3rem; }
+  .line-explain .le-line { min-width: unset; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width: 0%"></div>
+<div class="score-badge" id="scoreBadge">Score: <span id="score">0</span> / <span id="totalQ">0</span></div>
+
+<!-- ======================== HERO ======================== -->
+<section class="hero" id="hero">
+  <h1>Learn <span>MCP</span><br>The Fun Way</h1>
+  <p class="subtitle">No boring docs. Just "aha!" moments.</p>
+  <button class="start-btn" onclick="startLearning()">Let's Go &rarr;</button>
+</section>
+
+<!-- ======================== LESSON 0 ======================== -->
+<section class="lesson" id="lesson0">
+  <div class="lesson-number">Lesson 1 of 10 &mdash; Before We Start</div>
+  <h2><span class="emoji">⚡</span> How Does Claude Actually Work?</h2>
+  <p>Before we build anything with MCP, let's make sure we're on the same page about how AI models like Claude work behind the scenes.</p>
+  <div class="story" data-label="The basics">
+    Claude is a <strong>Large Language Model (LLM)</strong> built by Anthropic. You send it a message (a "prompt"), and it sends back a response. That's it &mdash; it's a conversation over an API.<br><br>
+    Every time you chat with Claude on <strong>claude.ai</strong>, your browser is making API calls behind the scenes. When we build our own apps, we make those same API calls ourselves using Python.
+  </div>
+  <h3 style="margin-top:1.5rem">Calling Claude from Python</h3>
+  <div class="code-block">
+    <span class="lang-tag">python</span>
+    <pre><span class="keyword">from</span> anthropic <span class="keyword">import</span> Anthropic
+
+<span class="comment"># Create a client (uses ANTHROPIC_API_KEY env variable)</span>
+client = Anthropic()
+
+<span class="comment"># Send a message, get a response</span>
+message = client.messages.create(
+    model=<span class="string">"claude-sonnet-4-0"</span>,
+    max_tokens=<span class="string">1024</span>,
+    messages=[
+        {<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"What is MCP?"</span>}
+    ]
+)
+
+print(message.content[0].text)</pre>
+  </div>
+  <div class="line-explain">
+    <div class="le-row"><span class="le-line">Anthropic()</span><span class="le-desc">Creates a client. It automatically reads your <code>ANTHROPIC_API_KEY</code> from environment variables.</span></div>
+    <div class="le-row"><span class="le-line">messages.create()</span><span class="le-desc">Sends your conversation to Claude and waits for a response. This is the core API call.</span></div>
+    <div class="le-row"><span class="le-line">model="claude-sonnet-4-0"</span><span class="le-desc">Which Claude model to use. Sonnet is fast &amp; affordable. Opus is the most powerful.</span></div>
+    <div class="le-row"><span class="le-line">messages=[...]</span><span class="le-desc">The conversation history. Each message has a <code>role</code> ("user" or "assistant") and <code>content</code>.</span></div>
+  </div>
+  <h3 style="margin-top:2rem">Pre-requisites</h3>
+  <div class="story" data-label="What you need">
+    <strong>1. Python 3.10+</strong> &mdash; Check with <code>python --version</code><br><br>
+    <strong>2. An Anthropic API Key</strong> &mdash; Get one at <code>console.anthropic.com</code>. Set it as an environment variable:<br>
+    <code style="display:inline-block;margin-top:0.5rem;background:#0d1117;padding:0.3rem 0.8rem;border-radius:6px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;">export ANTHROPIC_API_KEY="sk-ant-..."</code><br><br>
+    <strong>3. uv (recommended)</strong> &mdash; A fast Python package manager. Install: <code>pip install uv</code><br><br>
+    <strong>4. The MCP SDK</strong> &mdash; <code>pip install "mcp[cli]" anthropic</code>
+  </div>
+  <h3 style="margin-top:2rem">Not using Claude? Other options exist.</h3>
+  <div class="tip">
+    <strong>💡 MCP works with any LLM.</strong> While this guide uses Claude (Anthropic's API), the MCP protocol itself is model-agnostic. You could swap in:<br><br>
+    &bull; <strong>Ollama</strong> &mdash; Run open-source models locally (Llama, Mistral, etc.)<br>
+    &bull; <strong>Azure OpenAI</strong> &mdash; GPT-4 via Microsoft Azure<br>
+    &bull; <strong>OpenAI directly</strong> &mdash; GPT-4, GPT-4o<br>
+    &bull; <strong>Google Gemini</strong> &mdash; Via their API<br><br>
+    The MCP server/client code stays the same. Only the "call the LLM" part changes.
+  </div>
+  <div class="quiz-box" data-quiz="q0">
+    <h3>🎯 Quick Check</h3>
+    <p>What do you need to call Claude from Python?</p>
+    <button class="quiz-option" onclick="checkAnswer(this,'q0',false)">Just Python &mdash; Claude is built-in</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q0',true)">The anthropic Python package and an API key</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q0',false)">A special Claude IDE</button>
+    <div class="quiz-result" id="q0-result"></div>
+  </div>
+  <div class="nav-buttons"><div></div><button class="nav-btn primary" onclick="goTo(1)">Next: What is MCP? &rarr;</button></div>
+</section>
+
+<!-- ======================== LESSON 1 ======================== -->
+<section class="lesson" id="lesson1">
+  <div class="lesson-number">Lesson 2 of 10</div>
+  <h2><span class="emoji">🍕</span> MCP is a Pizza Delivery App</h2>
+  <p>Forget the technical jargon for a second. Here's MCP in one sentence:</p>
+  <div class="analogy">
+    <div class="label">🧠 The Analogy That'll Stick Forever</div>
+    <strong>You're building a food delivery app.</strong> You could partner with every restaurant individually &mdash; negotiate menus, handle payments, manage drivers for each one. OR... you could use a platform like Uber Eats that already has all those restaurant connections built in.<br><br>
+    <strong>MCP is Uber Eats for AI tools.</strong> Instead of you writing the code to connect Claude to GitHub, Slack, Gmail, databases &mdash; someone else has already built those connections. You just plug in.
+  </div>
+  <p>That "someone else" builds what's called an <mark>MCP Server</mark>. Your app connects to it using an <mark>MCP Client</mark>. Done.</p>
+  <div class="interactive-diagram">
+    <p style="color:var(--text-dim);margin-bottom:1rem;font-size:0.9rem;">hover over each box to see what it does</p>
+    <div class="diagram-row">
+      <div class="diagram-box you" title="Your code — the app you're building">🧑‍💻 Your App</div>
+      <span class="diagram-arrow">&rarr;</span>
+      <div class="diagram-box client" title="The bridge — handles all the protocol stuff for you">🔌 MCP Client</div>
+      <span class="diagram-arrow">&rarr;</span>
+      <div class="diagram-box server" title="Built by someone else — wraps an external service">📦 MCP Server</div>
+      <span class="diagram-arrow">&rarr;</span>
+      <div class="diagram-box external" title="The actual service — GitHub, Slack, a database, etc.">🌐 GitHub API</div>
+    </div>
+  </div>
+  <div class="quiz-box" data-quiz="q1">
+    <h3>🎯 Quick Check</h3>
+    <p>Your app wants to access GitHub repos. With MCP, who writes the GitHub integration code?</p>
+    <button class="quiz-option" onclick="checkAnswer(this,'q1',false)">You write all the GitHub tools from scratch</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q1',true)">The MCP Server author already did it for you</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q1',false)">Claude figures it out automatically</button>
+    <div class="quiz-result" id="q1-result"></div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="goTo(0)">&larr; Back</button><button class="nav-btn primary" onclick="goTo(2)">Next: The 3 Superpowers &rarr;</button></div>
+</section>
+
+<!-- ======================== LESSON 2 ======================== -->
+<section class="lesson" id="lesson2">
+  <div class="lesson-number">Lesson 3 of 10</div>
+  <h2><span class="emoji">🦸</span> The 3 Superpowers of an MCP Server</h2>
+  <p>Every MCP server can expose <strong>three things</strong>. This is the most important concept in all of MCP. Get this, and you get everything.</p>
+  <div class="mental-model">
+    <div class="card card-tool"><div class="icon">🔧</div><h4>Tools</h4><p>Functions that <em>Claude</em> decides to call</p><div class="who">Boss: The AI 🤖</div></div>
+    <div class="card card-resource"><div class="icon">📂</div><h4>Resources</h4><p>Data that <em>your code</em> fetches for context</p><div class="who">Boss: Your Code 💻</div></div>
+    <div class="card card-prompt"><div class="icon">✨</div><h4>Prompts</h4><p>Pre-built instructions <em>the user</em> triggers</p><div class="who">Boss: The User 👤</div></div>
+  </div>
+  <div class="analogy">
+    <div class="label">🧠 Restaurant Analogy (yes, still with food)</div>
+    Think of an MCP Server as a restaurant:<br>
+    <strong>🔧 Tools</strong> = The kitchen. The chef (Claude) decides what to cook when an order comes in.<br>
+    <strong>📂 Resources</strong> = The menu board. Your app reads the menu to show the user what's available.<br>
+    <strong>✨ Prompts</strong> = The "Chef's Special" button. When a customer (user) presses it, a carefully designed recipe kicks off.
+  </div>
+  <div class="tip">
+    <strong>💡 The Golden Rule:</strong> Ask yourself &mdash; <em>"Who is in control?"</em><br>
+    &bull; If <strong>Claude decides</strong> when to use it &rarr; <mark>Tool</mark><br>
+    &bull; If <strong>your code decides</strong> when to fetch it &rarr; <mark>Resource</mark><br>
+    &bull; If <strong>the user clicks/types</strong> to trigger it &rarr; <mark>Prompt</mark>
+  </div>
+  <div class="quiz-box" data-quiz="q2">
+    <h3>🎯 Scenario Time!</h3>
+    <p>You're building a doc editor. You want to show a list of available documents in a dropdown so the user can pick one. Which primitive?</p>
+    <button class="quiz-option" onclick="checkAnswer(this,'q2',false)">Tool &mdash; Claude should fetch the list</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q2',true)">Resource &mdash; Your app fetches the list for the UI</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q2',false)">Prompt &mdash; The user should trigger it</button>
+    <div class="quiz-result" id="q2-result"></div>
+  </div>
+  <div class="quiz-box" data-quiz="q3">
+    <h3>🎯 Another one!</h3>
+    <p>A user types <code>/format report.pdf</code> and a pre-built instruction tells Claude exactly how to reformat the document. Which primitive?</p>
+    <button class="quiz-option" onclick="checkAnswer(this,'q3',false)">Tool</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q3',false)">Resource</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q3',true)">Prompt &mdash; the user typed a command to trigger it</button>
+    <div class="quiz-result" id="q3-result"></div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="goTo(1)">&larr; Back</button><button class="nav-btn primary" onclick="goTo(3)">Next: Build a Server &rarr;</button></div>
+</section>
+
+<!-- ======================== LESSON 3 ======================== -->
+<section class="lesson" id="lesson3">
+  <div class="lesson-number">Lesson 4 of 10</div>
+  <h2><span class="emoji">🏗️</span> Build Your First MCP Server</h2>
+  <p>Building an MCP server in Python is <strong>embarrassingly simple.</strong> It's decorators on functions. If you can write a Python function, you can build an MCP server.</p>
+  <div class="story" data-label="Your mission">You're building a <strong>Notes Manager</strong>. Users want Claude to be able to read their notes and edit them.</div>
+  <div class="build-step"><div class="step-num">1</div><h4>Start the server (1 line)</h4><p>Copy-paste boilerplate. Forget about it.</p></div>
+  <div class="code-block"><span class="lang-tag">python</span><pre><span class="keyword">from</span> mcp.server.fastmcp <span class="keyword">import</span> FastMCP
+
+<span class="comment"># That's it. You have a server now.</span>
+mcp = FastMCP(<span class="string">"NotesMCP"</span>)</pre></div>
+  <div class="build-step"><div class="step-num">2</div><h4>Add some data</h4><p>Just a Python dict. Nothing fancy.</p></div>
+  <div class="code-block"><span class="lang-tag">python</span><pre>notes = {
+    <span class="string">"todo.md"</span>: <span class="string">"Buy groceries, call mom, fix the bug"</span>,
+    <span class="string">"ideas.md"</span>: <span class="string">"App idea: dog walking Uber"</span>,
+}</pre></div>
+  <div class="build-step"><div class="step-num">3</div><h4>Make a Tool (let Claude read notes)</h4><p>A decorator + a normal function. That's the whole pattern.</p></div>
+  <div class="code-block"><span class="lang-tag">python</span><pre><span class="keyword">from</span> pydantic <span class="keyword">import</span> Field
+
+<span class="decorator">@mcp.tool</span>(
+    name=<span class="string">"read_note"</span>,
+    description=<span class="string">"Read a note by its filename"</span>,
+)
+<span class="keyword">def</span> <span class="func">read_note</span>(
+    <span class="param">note_id</span>: str = Field(description=<span class="string">"Filename of the note"</span>),
+):
+    <span class="keyword">if</span> note_id <span class="keyword">not in</span> notes:
+        <span class="keyword">raise</span> ValueError(<span class="string">f"Note </span>{note_id}<span class="string"> not found"</span>)
+    <span class="keyword">return</span> notes[note_id]</pre></div>
+  <div class="tip"><strong>💡 "But what's <code>Field</code>?"</strong><br>It's just a label for Claude. When Claude sees this tool, it reads the description to understand what <code>note_id</code> means. Without it, Claude would just see a parameter named <code>note_id</code> with no context. That's it. It's a hint for the AI.</div>
+  <div class="build-step"><div class="step-num">4</div><h4>Run it</h4><p>One line at the bottom.</p></div>
+  <div class="code-block"><span class="lang-tag">python</span><pre><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    mcp.run(transport=<span class="string">"stdio"</span>)</pre></div>
+  <div class="analogy">
+    <div class="label">🧠 The pattern to remember</div>
+    Every MCP server tool follows this exact recipe:<br><br>
+    <strong>1.</strong> <code>@mcp.tool()</code> &mdash; "Hey MCP, register this"<br>
+    <strong>2.</strong> <code>def my_function()</code> &mdash; Just a normal Python function<br>
+    <strong>3.</strong> <code>Field(description=...)</code> &mdash; Labels for Claude to understand the params<br>
+    <strong>4.</strong> Return something or raise an error<br><br>That's it. There is no step 5.
+  </div>
+  <div class="quiz-box" data-quiz="q4">
+    <h3>🎯 What does <code>Field(description=...)</code> actually do?</h3>
+    <button class="quiz-option" onclick="checkAnswer(this,'q4',false)">Validates user input</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q4',false)">Creates a database field</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q4',true)">Gives Claude a hint about what this parameter means</button>
+    <div class="quiz-result" id="q4-result"></div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="goTo(2)">&larr; Back</button><button class="nav-btn primary" onclick="goTo(4)">Next: Build a Client &rarr;</button></div>
+</section>
+
+<!-- ======================== LESSON 4 ======================== -->
+<section class="lesson" id="lesson4">
+  <div class="lesson-number">Lesson 5 of 10</div>
+  <h2><span class="emoji">🔌</span> The Client: Your Phone Call to the Server</h2>
+  <div class="analogy">
+    <div class="label">📱 Phone Call Analogy</div>
+    <strong>Connecting</strong> = Dialing the number (starting the server process)<br>
+    <strong>list_tools()</strong> = "Hey, what can you do?"<br>
+    <strong>call_tool()</strong> = "Okay, do this specific thing for me"<br>
+    <strong>cleanup()</strong> = Hanging up the phone
+  </div>
+  <p>Here are the <strong>only 5 methods</strong> you ever need on a client:</p>
+  <div class="code-block"><span class="lang-tag">python</span><pre><span class="comment"># 1. "What tools do you have?"</span>
+tools = <span class="keyword">await</span> client.<span class="func">list_tools</span>()
+
+<span class="comment"># 2. "Run this tool with these inputs"</span>
+result = <span class="keyword">await</span> client.<span class="func">call_tool</span>(<span class="string">"read_note"</span>, {<span class="string">"note_id"</span>: <span class="string">"todo.md"</span>})
+
+<span class="comment"># 3. "Fetch this data for me"</span>
+data = <span class="keyword">await</span> client.<span class="func">read_resource</span>(<span class="string">"notes://all"</span>)
+
+<span class="comment"># 4. "What prompts do you have?"</span>
+prompts = <span class="keyword">await</span> client.<span class="func">list_prompts</span>()
+
+<span class="comment"># 5. "Give me this prompt filled in with these args"</span>
+messages = <span class="keyword">await</span> client.<span class="func">get_prompt</span>(<span class="string">"format"</span>, {<span class="string">"note_id"</span>: <span class="string">"todo.md"</span>})</pre></div>
+  <div class="tip"><strong>💡 You don't need to memorize the client code.</strong> The connection boilerplate is always the same &mdash; you write it once and copy it forever. What matters is knowing these 5 methods exist and when to call them.</div>
+  <div class="story" data-label="The agentic loop — the most important pattern">
+    <p>Here's the magic. Your app does this in a loop:</p>
+    <p style="margin-top:1rem">
+      <strong>1.</strong> Get tools from server &rarr; send them to Claude with user's question<br>
+      <strong>2.</strong> Claude says "I want to call <code>read_note</code>" &rarr; you call it via client<br>
+      <strong>3.</strong> Send tool result back to Claude &rarr; Claude says "I want to call <code>edit_note</code>"<br>
+      <strong>4.</strong> You call it &rarr; send result back &rarr; Claude gives final answer<br>
+      <strong>5.</strong> <em>Loop until Claude stops asking for tools</em>
+    </p>
+    <p style="margin-top:1rem;color:var(--accent)">This loop is the heartbeat of every MCP application.</p>
+  </div>
+  <div class="quiz-box" data-quiz="q5">
+    <h3>🎯 When does the agentic loop stop?</h3>
+    <button class="quiz-option" onclick="checkAnswer(this,'q5',false)">After exactly 3 tool calls</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q5',false)">When the user presses Enter</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q5',true)">When Claude's response has no more tool_use requests</button>
+    <div class="quiz-result" id="q5-result"></div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="goTo(3)">&larr; Back</button><button class="nav-btn primary" onclick="goTo(5)">Next: Resources &amp; Prompts &rarr;</button></div>
+</section>
+
+<!-- ======================== LESSON 5 ======================== -->
+<section class="lesson" id="lesson5">
+  <div class="lesson-number">Lesson 6 of 10</div>
+  <h2><span class="emoji">📂</span> Resources &amp; Prompts in 2 Minutes</h2>
+  <p>You already know tools. Resources and prompts use the <strong>exact same decorator pattern</strong> &mdash; just a different decorator name.</p>
+  <div class="versus">
+    <div>
+      <h4 style="color:var(--green)">📂 Resource (your app fetches data)</h4>
+      <div class="code-block" style="margin:0;border:none;padding:1rem;"><pre style="font-size:0.8rem"><span class="decorator">@mcp.resource</span>(<span class="string">"notes://all"</span>)
+<span class="keyword">def</span> <span class="func">list_all_notes</span>():
+    <span class="keyword">return</span> list(notes.keys())
+
+<span class="decorator">@mcp.resource</span>(<span class="string">"notes://{id}"</span>)
+<span class="keyword">def</span> <span class="func">get_note</span>(id: str):
+    <span class="keyword">return</span> notes[id]</pre></div>
+    </div>
+    <div>
+      <h4 style="color:var(--green)">✨ Prompt (user triggers a workflow)</h4>
+      <div class="code-block" style="margin:0;border:none;padding:1rem;"><pre style="font-size:0.8rem"><span class="decorator">@mcp.prompt</span>(name=<span class="string">"format"</span>)
+<span class="keyword">def</span> <span class="func">format_note</span>(
+    id: str = Field(...)
+):
+    <span class="keyword">return</span> [
+        base.UserMessage(
+            <span class="string">f"Reformat {id}..."</span>
+        )
+    ]</pre></div>
+    </div>
+  </div>
+  <div class="analogy">
+    <div class="label">🧠 The @ mentions trick</div>
+    Here's a slick pattern: when a user types <code>@todo.md</code> in their message, your app code:<br><br>
+    1. Detects the <code>@</code> mention<br>
+    2. Calls <code>read_resource("notes://todo.md")</code> &mdash; fetches the note content from the server<br>
+    3. Injects the content directly into the prompt sent to Claude<br>
+    4. Claude sees the note content immediately &mdash; <strong>no tool call needed!</strong><br><br>
+    This is way faster than Claude having to call a tool to read the note. The resource was fetched by <em>your code</em>, not by Claude. Your app already had the data before Claude even saw the message.
+  </div>
+  <div class="tip"><strong>💡 Resource URIs work like URLs:</strong><br><code>notes://all</code> &mdash; static, always returns the same type of thing (list of all note filenames)<br><code>notes://{id}</code> &mdash; dynamic, the <code>{id}</code> part becomes a function parameter automatically</div>
+  <div class="quiz-box" data-quiz="q6">
+    <h3>🎯 Pop Quiz!</h3>
+    <p>User types <code>@todo.md what's on my list?</code> &mdash; your app reads the note content via a resource and injects it into the prompt. Claude responds immediately. Why is this better than a tool?</p>
+    <button class="quiz-option" onclick="checkAnswer(this,'q6',false)">Tools can't read documents</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q6',true)">It's faster &mdash; no extra round trip for Claude to request and wait for the tool</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q6',false)">Resources are more secure</button>
+    <div class="quiz-result" id="q6-result"></div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="goTo(4)">&larr; Back</button><button class="nav-btn primary" onclick="goTo(6)">Next: Sampling (The Cool One) &rarr;</button></div>
+</section>
+
+<!-- ======================== LESSON 6 ======================== -->
+<section class="lesson" id="lesson6">
+  <div class="lesson-number">Lesson 7 of 10</div>
+  <h2><span class="emoji">🧠</span> Sampling: "Hey Client, Call Claude For Me"</h2>
+  <p>This is the most mind-bending feature. Ready?</p>
+  <div class="story" data-label="The scenario">
+    Imagine you've built a <strong>public MCP server for research</strong> &mdash; think of it like a free plugin anyone can install. It has a tool that scrapes Wikipedia, gathers articles, and compiles data on any topic. (Example: a user connects to your server and asks "research quantum computing".)<br><br>
+    Now, after gathering all that raw data, the tool needs to <strong>summarize it into a nice report</strong>. Summarization needs an LLM like Claude.<br><br>
+    <strong>The problem:</strong> Since users connect to <em>your</em> server, every request flows through <em>your</em> code. If you put your own Anthropic API key on the server to call Claude for summarization, then every user's request costs <em>you</em> money. Your server goes viral &mdash; congrats, you now owe Anthropic $50,000. Not great.
+  </div>
+  <div class="analogy">
+    <div class="label">🧠 The "Reverse Uno" analogy</div>
+    Normal flow: Client asks Server to do stuff.<br>
+    Sampling: Server asks Client <em>"hey, YOU call Claude for me and send me the result."</em><br><br>
+    It's like a restaurant (server) saying to the customer (client): <em>"We prepared your ingredients, but can you cook the final dish at your house? You've got a better kitchen &mdash; and your own gas bill."</em><br><br>
+    <strong>The client has the API key. The client pays. The server stays cheap to run.</strong>
+  </div>
+  <h3 style="margin-top:2rem">Server Side &mdash; Asking the client to call Claude</h3>
+  <div class="code-block"><span class="lang-tag">python &mdash; server</span><pre><span class="decorator">@mcp.tool</span>()
+<span class="keyword">async def</span> <span class="func">summarize</span>(text: str, ctx: Context):
+    result = <span class="keyword">await</span> ctx.session.<span class="func">create_message</span>(
+        messages=[SamplingMessage(
+            role=<span class="string">"user"</span>,
+            content=TextContent(type=<span class="string">"text"</span>, text=text)
+        )],
+        max_tokens=<span class="string">4000</span>,
+    )
+    <span class="keyword">return</span> result.content.text</pre></div>
+  <div class="recall"><strong>🔁 Remember:</strong> <code>@mcp.tool()</code> registers this as a tool &mdash; something Claude (or a client) can call. The new piece here is <code>ctx: Context</code>. This special object gives the tool a way to talk <em>back</em> to the client. <code>ctx.session.create_message()</code> sends a request <em>backwards</em> from server to client, saying "please generate text for me."</div>
+  <div class="line-explain">
+    <div class="le-row"><span class="le-line">@mcp.tool()</span><span class="le-desc">Registers <code>summarize</code> as a tool on the server. A connected client (and Claude) can call it.</span></div>
+    <div class="le-row"><span class="le-line">ctx: Context</span><span class="le-desc">The server's "walkie-talkie" back to the client. It lets the tool send requests <em>back</em> to whoever connected.</span></div>
+    <div class="le-row"><span class="le-line">ctx.session.create_message()</span><span class="le-desc">The sampling call. Says: "Client, here's a prompt. Please send it to an LLM and give me back the response."</span></div>
+    <div class="le-row"><span class="le-line">SamplingMessage(...)</span><span class="le-desc">An MCP-formatted message. The client will convert this into whatever format its LLM needs.</span></div>
+    <div class="le-row"><span class="le-line">result.content.text</span><span class="le-desc">The LLM's generated text comes back here. The server can use it, process it, or return it.</span></div>
+  </div>
+  <h3 style="margin-top:2rem">Client Side &mdash; Handling the server's request</h3>
+  <div class="code-block"><span class="lang-tag">python &mdash; client</span><pre><span class="keyword">async def</span> <span class="func">sampling_callback</span>(context, params):
+    text = <span class="keyword">await</span> <span class="func">chat</span>(params.messages)  <span class="comment"># YOUR function that calls Anthropic API</span>
+    <span class="keyword">return</span> CreateMessageResult(
+        role=<span class="string">"assistant"</span>, model=model,
+        content=TextContent(type=<span class="string">"text"</span>, text=text),
+    )
+
+<span class="comment"># Pass it when connecting to the server</span>
+ClientSession(read, write, <span class="param">sampling_callback</span>=sampling_callback)</pre></div>
+  <div class="line-explain">
+    <div class="le-row"><span class="le-line">sampling_callback</span><span class="le-desc">A function YOU write. It gets called automatically when the server sends a <code>create_message</code> request.</span></div>
+    <div class="le-row"><span class="le-line">params.messages</span><span class="le-desc">The messages the server wants you to send to Claude. These are in MCP format &mdash; you may need to convert them.</span></div>
+    <div class="le-row"><span class="le-line">chat(params.messages)</span><span class="le-desc">YOUR function that calls the Anthropic API. This is where the API key and cost lives &mdash; on the <em>client</em> side.</span></div>
+    <div class="le-row"><span class="le-line">sampling_callback=...</span><span class="le-desc">You pass your callback when creating the connection. Now the server can request text generation at any time.</span></div>
+  </div>
+  <h3 style="margin-top:2rem">The Full Communication Flow</h3>
+  <div class="flow-vis">
+    <div class="fv-step"><div class="fv-num cli">1</div><div class="fv-text"><strong>Client</strong> calls <code>session.call_tool("summarize", {"text": "..."})</code></div></div>
+    <div class="fv-step"><div class="fv-num srv">2</div><div class="fv-text"><strong>Server</strong> receives the call, starts running the <code>summarize</code> tool function</div></div>
+    <div class="fv-step"><div class="fv-num srv">3</div><div class="fv-text"><strong>Server</strong> hits <code>ctx.session.create_message()</code> &mdash; sends a request BACK to the client: "Please call an LLM with this prompt"</div></div>
+    <div class="fv-step"><div class="fv-num cli">4</div><div class="fv-text"><strong>Client's</strong> <code>sampling_callback</code> fires automatically. It calls the Anthropic API using the CLIENT's API key</div></div>
+    <div class="fv-step"><div class="fv-num api">5</div><div class="fv-text"><strong>Claude API</strong> returns generated text to the client</div></div>
+    <div class="fv-step"><div class="fv-num cli">6</div><div class="fv-text"><strong>Client</strong> wraps the text in <code>CreateMessageResult</code> and sends it back to the server</div></div>
+    <div class="fv-step"><div class="fv-num srv">7</div><div class="fv-text"><strong>Server</strong> receives the text in <code>result.content.text</code> and returns it as the tool's output</div></div>
+  </div>
+  <div class="quiz-box" data-quiz="q7">
+    <h3>🎯 Who pays for the Claude API call in sampling?</h3>
+    <button class="quiz-option" onclick="checkAnswer(this,'q7',false)">The MCP server author</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q7',true)">The client (whoever is connecting to the server)</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q7',false)">It's free with sampling</button>
+    <div class="quiz-result" id="q7-result"></div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="goTo(5)">&larr; Back</button><button class="nav-btn primary" onclick="goTo(7)">Next: Roots &amp; Notifications &rarr;</button></div>
+</section>
+
+<!-- ======================== LESSON 7 ======================== -->
+<section class="lesson" id="lesson7">
+  <div class="lesson-number">Lesson 8 of 10</div>
+  <h2><span class="emoji">🔐</span> Roots &amp; Notifications</h2>
+  <h3 style="margin-top:1.5rem">Roots = "You can look here, but not there"</h3>
+  <div class="analogy">
+    <div class="label">🧠 Hotel Keycard Analogy</div>
+    Roots are like hotel keycards. Your keycard opens your room and the gym, but not other guest rooms. You <em>give</em> the MCP server a list of folders it's allowed to access. It can't snoop anywhere else.<br><br>
+    <strong>Bonus:</strong> Claude can ask "what folders do I have access to?" (list_roots) and then "what's in that folder?" (read_dir) &mdash; instead of the user typing full file paths.
+  </div>
+
+  <h3 style="margin-top:2rem">Step 1: The Client Defines Which Folders Are Allowed</h3>
+
+  <p>The client is the one who decides which folders the server can access. Typically, the user provides these paths (e.g., as command-line arguments when launching the app):</p>
+
+  <div class="code-block"><span class="lang-tag">python &mdash; client: defining roots</span><pre><span class="keyword">from</span> pathlib <span class="keyword">import</span> Path
+<span class="keyword">from</span> pydantic <span class="keyword">import</span> FileUrl
+<span class="keyword">from</span> mcp.types <span class="keyword">import</span> Root, ListRootsResult
+
+<span class="comment"># User says: "Server, you can access these two folders"</span>
+root_paths = [<span class="string">"/Users/me/Movies"</span>, <span class="string">"/Users/me/Desktop"</span>]
+
+<span class="comment"># Convert them to Root objects (MCP's format)</span>
+roots = []
+<span class="keyword">for</span> path <span class="keyword">in</span> root_paths:
+    p = Path(path).resolve()
+    file_url = FileUrl(<span class="string">f"file://</span>{p}<span class="string">"</span>)
+    roots.append(Root(uri=file_url, name=p.name))
+
+<span class="comment"># Create a callback — when the server asks "what roots do I have?",</span>
+<span class="comment"># this function responds with the list</span>
+<span class="keyword">async def</span> <span class="func">handle_list_roots</span>(context):
+    <span class="keyword">return</span> ListRootsResult(roots=roots)
+
+<span class="comment"># Pass the callback when creating the session</span>
+ClientSession(read, write, <span class="param">list_roots_callback</span>=handle_list_roots)</pre></div>
+
+  <div class="line-explain">
+    <div class="le-row"><span class="le-line">root_paths = [...]</span><span class="le-desc">These are the actual folder paths. Usually the user provides them (e.g., <code>uv run main.py /Users/me/Movies</code>).</span></div>
+    <div class="le-row"><span class="le-line">Root(uri=..., name=...)</span><span class="le-desc"><strong>From MCP.</strong> A Root object wraps a folder path in a <code>file://</code> URI. The MCP spec requires all roots to use this format.</span></div>
+    <div class="le-row"><span class="le-line">handle_list_roots()</span><span class="le-desc"><strong>Your callback.</strong> The server doesn't get the roots immediately. Instead, it can ask for them later, and this callback responds.</span></div>
+    <div class="le-row"><span class="le-line">list_roots_callback=...</span><span class="le-desc">You wire the callback into the ClientSession. Now whenever the server calls <code>ctx.session.list_roots()</code>, this fires.</span></div>
+  </div>
+
+  <div class="tip"><strong>💡 The flow:</strong> User provides folder paths &rarr; Client converts them to Root objects &rarr; Client registers a callback &rarr; Server calls <code>ctx.session.list_roots()</code> whenever it needs them &rarr; Callback fires and sends the list back. The server never gets the roots upfront &mdash; it asks for them on demand.</div>
+
+  <h3 style="margin-top:2rem">Step 2: The Server Checks Roots Before Accessing Files</h3>
+
+  <p>Now on the server side, every tool that touches the file system should verify the path is allowed:</p>
+
+  <div class="code-block"><span class="lang-tag">python &mdash; server: using roots in a tool</span><pre><span class="decorator">@mcp.tool</span>()
+<span class="keyword">async def</span> <span class="func">convert_video</span>(input_path: str, format: str, *, ctx: Context):
+    input_file = Path(input_path)
+
+    <span class="comment"># ⛔ CHECK BEFORE DOING ANYTHING</span>
+    <span class="keyword">if not await</span> <span class="func">is_path_allowed</span>(input_file, ctx):
+        <span class="keyword">raise</span> ValueError(<span class="string">"Access denied!"</span>)
+
+    <span class="keyword">return await</span> VideoConverter.convert(input_path, format)</pre></div>
+
+  <div class="tip">
+    <strong>⚠️ Where does <code>is_path_allowed</code> come from?</strong><br>
+    It is <strong>NOT</strong> part of the MCP library. <strong>You write it yourself.</strong> The MCP SDK gives you <code>ctx.session.list_roots()</code> (which triggers the client's callback you saw in Step 1 above) &mdash; but checking the requested path against that list is YOUR responsibility. Here's what that function looks like:
+  </div>
+
+  <div class="code-block"><span class="lang-tag">python &mdash; you write this yourself</span><pre><span class="keyword">async def</span> <span class="func">is_path_allowed</span>(requested_path: Path, ctx: Context) -> bool:
+    <span class="comment"># Ask the client: "What roots (folders) did you allow?"</span>
+    roots_result = <span class="keyword">await</span> ctx.session.<span class="func">list_roots</span>()  <span class="comment"># ← this IS from MCP</span>
+    client_roots = roots_result.roots
+
+    <span class="keyword">if not</span> requested_path.exists():
+        <span class="keyword">return False</span>
+
+    <span class="comment"># Check: is the requested path inside any allowed root?</span>
+    <span class="keyword">for</span> root <span class="keyword">in</span> client_roots:
+        root_path = file_url_to_path(root.uri)
+        <span class="keyword">try</span>:
+            requested_path.relative_to(root_path)  <span class="comment"># subfolder check</span>
+            <span class="keyword">return True</span>
+        <span class="keyword">except</span> ValueError:
+            <span class="keyword">continue</span>
+
+    <span class="keyword">return False</span></pre></div>
+
+  <div class="line-explain">
+    <div class="le-row"><span class="le-line">ctx.session.list_roots()</span><span class="le-desc"><strong>From MCP.</strong> Asks the client "what folders did you allow?" Client responds with a list of <code>Root</code> objects.</span></div>
+    <div class="le-row"><span class="le-line">relative_to(root_path)</span><span class="le-desc"><strong>Standard Python.</strong> Checks if the requested path is inside the allowed folder. Throws <code>ValueError</code> if not.</span></div>
+    <div class="le-row"><span class="le-line">is_path_allowed()</span><span class="le-desc"><strong>Your own function.</strong> MCP does NOT enforce roots automatically &mdash; you must call this in every tool that touches files.</span></div>
+  </div>
+
+  <h3 style="margin-top:2rem">Step 3: Give Claude Tools to Discover Files</h3>
+
+  <p>Remember the hotel keycard analogy? <code>is_path_allowed</code> is the lock on the door. But Claude also needs a way to <em>find</em> which doors exist. That's where <code>list_roots</code> and <code>read_dir</code> come in &mdash; two tools you define on the server so Claude can explore the allowed folders:</p>
+
+  <div class="code-block"><span class="lang-tag">python &mdash; server: let Claude discover files</span><pre><span class="decorator">@mcp.tool</span>()
+<span class="keyword">async def</span> <span class="func">list_roots</span>(ctx: Context):
+    <span class="string">"""List all directories that are accessible to this server."""</span>
+    roots_result = <span class="keyword">await</span> ctx.session.<span class="func">list_roots</span>()
+    client_roots = roots_result.roots
+    <span class="keyword">return</span> [file_url_to_path(root.uri) <span class="keyword">for</span> root <span class="keyword">in</span> client_roots]
+
+
+<span class="decorator">@mcp.tool</span>()
+<span class="keyword">async def</span> <span class="func">read_dir</span>(
+    path: str = Field(description=<span class="string">"Path to a directory to read"</span>),
+    *,
+    ctx: Context,
+):
+    <span class="string">"""Read directory contents. Path must be within an allowed root."""</span>
+    requested_path = Path(path).resolve()
+
+    <span class="keyword">if not await</span> <span class="func">is_path_allowed</span>(requested_path, ctx):
+        <span class="keyword">raise</span> ValueError(<span class="string">"Can only read directories within a root"</span>)
+
+    <span class="keyword">return</span> [entry.name <span class="keyword">for</span> entry <span class="keyword">in</span> requested_path.iterdir()]</pre></div>
+
+  <div class="line-explain">
+    <div class="le-row"><span class="le-line">list_roots</span><span class="le-desc">When Claude asks "what folders can I see?", this tool calls <code>ctx.session.list_roots()</code> (which triggers the client's callback from Step 1) and returns human-readable paths.</span></div>
+    <div class="le-row"><span class="le-line">read_dir</span><span class="le-desc">When Claude asks "what's inside /Users/me/Movies?", this tool lists the folder contents &mdash; but <strong>only if</strong> the path passes the <code>is_path_allowed</code> check first.</span></div>
+    <div class="le-row"><span class="le-line">*, ctx: Context</span><span class="le-desc">The <code>*</code> before <code>ctx</code> means it's a keyword-only argument. MCP injects Context automatically &mdash; the user never provides it.</span></div>
+  </div>
+
+  <div class="analogy">
+    <div class="label">🧠 How Claude uses all three together</div>
+    User says: <em>"Convert biking.mp4 to MOV"</em><br><br>
+    <strong>1.</strong> Claude calls <code>list_roots()</code> &rarr; gets back <code>["/Users/me/Movies", "/Users/me/Desktop"]</code><br>
+    <strong>2.</strong> Claude calls <code>read_dir("/Users/me/Movies")</code> &rarr; gets back <code>["biking.mp4", "vacation.mp4"]</code><br>
+    <strong>3.</strong> Claude calls <code>convert_video("/Users/me/Movies/biking.mp4", "mov")</code> &rarr; which checks <code>is_path_allowed</code> &rarr; ✅ allowed &rarr; conversion runs<br><br>
+    The user just said "biking.mp4" &mdash; Claude figured out the full path on its own by exploring the roots. No full paths required from the user.
+  </div>
+
+  <h3 style="margin-top:2.5rem">Notifications = "Hey user, I'm still working..."</h3>
+  <p>Long-running tools can feel broken without feedback. Two server-side calls fix this:</p>
+
+  <div class="code-block"><span class="lang-tag">python &mdash; server</span><pre><span class="decorator">@mcp.tool</span>()
+<span class="keyword">async def</span> <span class="func">research</span>(topic: str, ctx: Context):
+    <span class="keyword">await</span> ctx.<span class="func">info</span>(<span class="string">"Searching Wikipedia..."</span>)      <span class="comment"># Log message</span>
+    <span class="keyword">await</span> ctx.<span class="func">report_progress</span>(30, 100)             <span class="comment"># 30% done</span>
+
+    data = <span class="keyword">await</span> scrape(topic)
+
+    <span class="keyword">await</span> ctx.<span class="func">info</span>(<span class="string">"Writing report..."</span>)
+    <span class="keyword">await</span> ctx.<span class="func">report_progress</span>(80, 100)             <span class="comment"># 80% done</span>
+    <span class="keyword">return</span> summarize(data)</pre></div>
+
+  <div class="tip"><strong>💡 But how does the client actually SEE these?</strong> The server <em>emits</em> notifications, but the client needs <strong>callbacks</strong> to catch them &mdash; just like catching a thrown ball:</div>
+
+  <div class="flow-vis">
+    <div class="fv-step"><div class="fv-num srv">1</div><div class="fv-text"><strong>Server</strong> calls <code>ctx.info("Searching...")</code> inside a tool</div></div>
+    <div class="fv-step"><div class="fv-num srv">2</div><div class="fv-text"><strong>MCP protocol</strong> automatically sends a <code>LoggingMessageNotification</code> JSON message over the wire to the client</div></div>
+    <div class="fv-step"><div class="fv-num cli">3</div><div class="fv-text"><strong>Client's</strong> <code>logging_callback</code> fires automatically &mdash; prints "Searching..." to the terminal (or shows it in a UI)</div></div>
+  </div>
+
+  <div class="code-block"><span class="lang-tag">python &mdash; client: catching notifications</span><pre><span class="comment"># What happens when the server sends a log message</span>
+<span class="keyword">async def</span> <span class="func">logging_callback</span>(params):
+    print(params.data)  <span class="comment"># prints "Searching Wikipedia..."</span>
+
+<span class="comment"># What happens when the server reports progress</span>
+<span class="keyword">async def</span> <span class="func">progress_callback</span>(progress, total, message):
+    percentage = (progress / total) * 100
+    print(<span class="string">f"Progress: </span>{percentage:.0f}<span class="string">%"</span>)  <span class="comment"># prints "Progress: 30%"</span>
+
+<span class="comment"># Wire them up:</span>
+<span class="comment"># logging_callback → goes into ClientSession (catches ALL log messages)</span>
+ClientSession(read, write, <span class="param">logging_callback</span>=logging_callback)
+
+<span class="comment"># progress_callback → goes into a specific call_tool (catches progress for THIS call)</span>
+session.<span class="func">call_tool</span>(<span class="string">"research"</span>, {...}, <span class="param">progress_callback</span>=progress_callback)</pre></div>
+
+  <div class="quiz-box" data-quiz="q8">
+    <h3>🎯 True or False: The MCP SDK automatically prevents tools from accessing files outside roots.</h3>
+    <button class="quiz-option" onclick="checkAnswer(this,'q8',false)">True &mdash; MCP enforces it automatically</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q8',true)">False &mdash; You write is_path_allowed() yourself using ctx.session.list_roots()</button>
+    <div class="quiz-result" id="q8-result"></div>
+  </div>
+  <div class="nav-buttons"><button class="nav-btn" onclick="goTo(6)">&larr; Back</button><button class="nav-btn primary" onclick="goTo(8)">Next: Transport &amp; Final Boss &rarr;</button></div>
+</section>
+
+<!-- ======================== LESSON 8 ======================== -->
+<section class="lesson" id="lesson8">
+  <div class="lesson-number">Lesson 9 of 10</div>
+  <h2><span class="emoji">🚀</span> Transport: How Messages Travel</h2>
+  <p>MCP messages are just JSON. But <em>how</em> they get from A to B depends on the transport.</p>
+  <div class="versus">
+    <div>
+      <h4 style="color:var(--accent)">📟 Stdio (Development)</h4>
+      <p style="font-size:0.9rem;color:var(--text-dim)">Client and server on the <strong>same machine</strong>. Talk via stdin/stdout. Like two people in the same room passing notes.</p>
+      <div class="code-block" style="margin:0.5rem 0;border:none;padding:0.8rem;"><pre style="font-size:0.78rem">mcp.run(transport=<span class="string">"stdio"</span>)</pre></div>
+      <p style="font-size:0.85rem">✅ Full features<br>✅ Simple setup<br>❌ Same machine only</p>
+    </div>
+    <div>
+      <h4 style="color:var(--purple)">🌐 Streamable HTTP (Production)</h4>
+      <p style="font-size:0.9rem;color:var(--text-dim)">Client and server on <strong>different machines</strong>. Talk over HTTP. Like a phone call across the world.</p>
+      <div class="code-block" style="margin:0.5rem 0;border:none;padding:0.8rem;"><pre style="font-size:0.78rem">mcp.run(transport=<span class="string">"streamable-http"</span>)</pre></div>
+      <p style="font-size:0.85rem">✅ Remote servers<br>✅ Scalable<br>⚠️ Some features may be limited</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:2rem">⚠️ The Two Scary Flags</h3>
+  <p>When using HTTP transport, two config flags can dramatically change what your server can do. Here's exactly where they go in your code:</p>
+
+  <div class="code-block"><span class="lang-tag">python &mdash; where the flags go</span><pre><span class="keyword">from</span> mcp.server.fastmcp <span class="keyword">import</span> FastMCP
+
+<span class="comment"># These flags are set when you CREATE the server</span>
+mcp = FastMCP(
+    <span class="string">"my-server"</span>,
+    <span class="param">stateless_http</span>=<span class="keyword">True</span>,   <span class="comment"># ⚠️ Enables scaling, BUT kills sampling + notifications</span>
+    <span class="param">json_response</span>=<span class="keyword">True</span>,    <span class="comment"># ⚠️ Simpler responses, BUT kills streaming progress</span>
+)
+
+<span class="comment"># Then run with HTTP transport</span>
+mcp.run(transport=<span class="string">"streamable-http"</span>)</pre></div>
+
+  <div class="line-explain">
+    <div class="le-row"><span class="le-line">stateless_http=True</span><span class="le-desc">Server forgets clients between requests. Good for load balancers (multiple server instances), but <strong>kills</strong>: sampling, progress, roots, subscriptions.</span></div>
+    <div class="le-row"><span class="le-line">json_response=True</span><span class="le-desc">Responses come as plain JSON instead of SSE streams. <strong>Kills</strong>: real-time progress updates and log messages during tool execution.</span></div>
+    <div class="le-row"><span class="le-line">Both False (default)</span><span class="le-desc">All features work &mdash; sampling, notifications, progress, roots. Use this unless you specifically need horizontal scaling.</span></div>
+  </div>
+
+  <div class="tip"><strong>💡 Rule of thumb:</strong> Start with both <code>False</code> (the default). Only set to <code>True</code> when you need horizontal scaling and understand the tradeoffs. If your server uses sampling or progress notifications, you <strong>cannot</strong> use <code>stateless_http=True</code>.</div>
+
+  <div class="nav-buttons"><button class="nav-btn" onclick="goTo(7)">&larr; Back</button><button class="nav-btn primary" onclick="goTo(9)">Next: Final Checkpoint &rarr;</button></div>
+</section>
+
+<!-- ======================== LESSON 9 ======================== -->
+<section class="lesson" id="lesson9">
+  <div class="lesson-number">Lesson 10 of 10 &mdash; Final Checkpoint</div>
+  <h2><span class="emoji">🏆</span> Everything You've Learned</h2>
+  <div class="story" data-label="Your MCP knowledge">
+    <h3 style="color:var(--green);margin-bottom:1rem">Here's what you now know:</h3>
+    <p>✅ <strong>Claude's API</strong> &mdash; <code>messages.create()</code> with a model, messages, and max_tokens</p>
+    <p>✅ <strong>MCP</strong> = "Uber Eats for AI tools" &mdash; someone else builds the integrations</p>
+    <p>✅ <strong>3 primitives</strong> &mdash; Tools (AI controls), Resources (your code controls), Prompts (user controls)</p>
+    <p>✅ <strong>Server</strong> = decorators on functions: <code>@mcp.tool()</code>, <code>@mcp.resource()</code>, <code>@mcp.prompt()</code></p>
+    <p>✅ <strong>Client</strong> = 5 methods: list_tools, call_tool, read_resource, list_prompts, get_prompt</p>
+    <p>✅ <strong>The agentic loop</strong> &mdash; keep sending tool results back to Claude until it's done</p>
+    <p>✅ <strong>Sampling</strong> &mdash; server says "you call Claude for me" (client pays)</p>
+    <p>✅ <strong>Roots</strong> &mdash; file access control (you write <code>is_path_allowed()</code> yourself!)</p>
+    <p>✅ <strong>Notifications</strong> &mdash; <code>ctx.info()</code> + <code>ctx.report_progress()</code> on server, callbacks on client</p>
+    <p>✅ <strong>Transport</strong> &mdash; stdio for dev, streamable-http for production</p>
+    <p>✅ <strong>Scary flags</strong> &mdash; <code>stateless_http</code> and <code>json_response</code> trade features for scalability</p>
+  </div>
+  <div class="quiz-box" data-quiz="q9">
+    <h3>🎯 Final Boss Question</h3>
+    <p>You're building a public MCP server for a weather service. Users connect from their own apps. The server needs to generate a natural language forecast (needs an LLM). What's the smartest approach?</p>
+    <button class="quiz-option" onclick="checkAnswer(this,'q9',false)">Put your Anthropic API key on the server and call Claude directly</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q9',true)">Use sampling &mdash; let the client call Claude, so they pay for their own usage</button>
+    <button class="quiz-option" onclick="checkAnswer(this,'q9',false)">Don't use an LLM, just return raw weather data</button>
+    <div class="quiz-result" id="q9-result"></div>
+  </div>
+  <div id="finalScore" style="display:none;text-align:center;padding:2rem;margin:2rem 0;background:var(--card);border-radius:16px;border:2px solid var(--green);">
+    <h2 style="color:var(--green);margin-bottom:0.5rem">🎉 Course Complete!</h2>
+    <p style="font-family:'Caveat',cursive;font-size:1.5rem;color:var(--yellow);" id="finalScoreText"></p>
+    <p style="color:var(--text-dim);margin-top:1rem;">Now go build something. You've got the mental model &mdash; the syntax is just a search away.</p>
+  </div>
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goTo(8)">&larr; Back</button>
+    <button class="nav-btn primary" onclick="showFinalScore()">See My Score 🏆</button>
+  </div>
+  <div class="curated-section">
+    <div class="curated-label">Curated by</div>
+    <div class="curated-name">Santhosh T</div>
+    <div class="social-links">
+      <a href="https://www.linkedin.com/in/t-santhosh" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        LinkedIn
+      </a>
+      <a href="https://github.com/san-gitlogin" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        GitHub
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+let currentLesson=0,score=0;const totalQuestions=10;let answered={};
+function startLearning(){document.getElementById('hero').style.display='none';document.getElementById('scoreBadge').style.display='block';document.getElementById('totalQ').textContent=totalQuestions;goTo(0)}
+function goTo(n){document.querySelectorAll('.lesson').forEach(l=>l.classList.remove('active'));const lesson=document.getElementById('lesson'+n);if(lesson){lesson.classList.add('active');currentLesson=n;updateProgress();window.scrollTo({top:0,behavior:'smooth'})}}
+function updateProgress(){document.getElementById('progressBar').style.width=((currentLesson+1)/10)*100+'%'}
+function checkAnswer(btn,quizId,isCorrect){if(answered[quizId])return;answered[quizId]=true;const box=btn.closest('.quiz-box'),options=box.querySelectorAll('.quiz-option'),result=document.getElementById(quizId+'-result');options.forEach(opt=>{opt.disabled=true;if(opt.getAttribute('onclick').includes('true'))opt.classList.add('correct')});if(isCorrect){btn.classList.add('correct');score++;result.textContent='\u2705 Nailed it!';result.className='quiz-result show pass'}else{btn.classList.add('wrong');result.textContent='\u274C Not quite \u2014 but now you know! Look at the green option.';result.className='quiz-result show fail'}document.getElementById('score').textContent=score}
+function showFinalScore(){const el=document.getElementById('finalScore');el.style.display='block';const pct=Math.round((score/totalQuestions)*100);let msg='';if(pct===100)msg=`Perfect ${score}/${totalQuestions}! You're an MCP wizard \uD83E\uDDD9\u200D\u2642\uFE0F`;else if(pct>=70)msg=`${score}/${totalQuestions} \u2014 Solid! You definitely get MCP \uD83D\uDCAA`;else if(pct>=40)msg=`${score}/${totalQuestions} \u2014 Not bad! Review the tricky ones \uD83D\uDCD6`;else msg=`${score}/${totalQuestions} \u2014 Scroll back through the lessons, you'll get it! \uD83D\uDD04`;document.getElementById('finalScoreText').textContent=msg;el.scrollIntoView({behavior:'smooth'})}
+</script>
+</body>
+</html>
