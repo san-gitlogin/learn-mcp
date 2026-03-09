@@ -117,6 +117,8 @@ mark { background: rgba(88,166,255,0.15); color: var(--accent); padding: 0.1em 0
 .diagram-box.server { background: rgba(188,140,255,0.15); border: 1px solid var(--purple); color: var(--purple); }
 .diagram-box.external { background: rgba(247,120,186,0.15); border: 1px solid var(--pink); color: var(--pink); }
 .diagram-arrow { color: var(--text-dim); font-size: 1.2rem; }
+.diagram-box::after { display: none; }
+.diagram-hint-tap { display: none; }
 
 .build-step { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 2rem; margin: 1rem 0; position: relative; padding-left: 4rem; }
 .build-step .step-num { position: absolute; left: 1rem; top: 1.2rem; width: 2rem; height: 2rem; background: var(--accent); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; }
@@ -142,10 +144,71 @@ mark { background: rgba(88,166,255,0.15); color: var(--accent); padding: 0.1em 0
 .curated-section .social-links a svg { width: 18px; height: 18px; fill: currentColor; }
 
 @media (max-width: 600px) {
+  .lesson { padding: 2rem 1.1rem; }
+  .lesson h2 { font-size: 1.5rem; }
+
+  /* Diagram: vertical layout on mobile */
+  .diagram-row { flex-direction: column; gap: 0.3rem; }
+  .diagram-box { width: 100%; text-align: center; padding: 0.8rem 1rem; }
+  .diagram-arrow { transform: rotate(90deg); font-size: 1rem; }
+  .diagram-hint-hover { display: none; }
+  .diagram-hint-tap { display: none; }
+  /* Show descriptions below each box on mobile */
+  .diagram-box::after {
+    content: attr(title);
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-dim);
+    margin-top: 0.3rem;
+    line-height: 1.4;
+  }
+
+  /* 3-column cards to single column */
   .mental-model { grid-template-columns: 1fr; }
+
+  /* Side-by-side comparisons to stacked */
   .versus { grid-template-columns: 1fr; }
+
+  /* Line explanations: stack label above description */
   .line-explain .le-row { flex-direction: column; gap: 0.3rem; }
   .line-explain .le-line { min-width: unset; }
+
+  /* Code blocks: smaller font, allow wrap for very long lines */
+  .code-block { padding: 1rem 0.8rem; }
+  .code-block pre { font-size: 0.76rem; line-height: 1.7; }
+  .code-block .lang-tag { font-size: 0.6rem; top: 5px; right: 8px; }
+
+  /* Reduce padding on content boxes */
+  .story { padding: 1.5rem 1.2rem; }
+  .analogy { padding: 1.2rem 1.2rem; }
+  .tip, .recall { padding: 1rem 1.1rem; }
+  .quiz-box { padding: 1.5rem 1.2rem; }
+  .interactive-diagram { padding: 1.5rem 1rem; }
+  .flow-vis { padding: 1.2rem 1rem; }
+  .flow-vis .fv-text { font-size: 0.88rem; }
+  .flow-vis .fv-text code { font-size: 0.76rem; }
+
+  /* Build steps: tighter left margin */
+  .build-step { padding-left: 3.2rem; padding-right: 1.2rem; }
+  .build-step .step-num { left: 0.8rem; }
+
+  /* Nav buttons: smaller */
+  .nav-btn { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
+
+  /* Score badge: smaller, doesn't overlap */
+  .score-badge { top: 12px; right: 10px; padding: 0.3rem 0.8rem; font-size: 0.75rem; }
+
+  /* Inline code: prevent overflow in paragraphs */
+  code { word-break: break-word; font-size: 0.82em; }
+
+  /* Prevent any horizontal overflow */
+  .lesson { overflow-x: hidden; }
+
+  /* Curated section */
+  .curated-section .curated-name { font-size: 1.4rem; }
+  .curated-section .social-links { flex-direction: column; gap: 0.8rem; }
+  .curated-section .social-links a { justify-content: center; }
 }
 </style>
 </head>
@@ -235,7 +298,8 @@ print(message.content[0].text)</pre>
   </div>
   <p>That "someone else" builds what's called an <mark>MCP Server</mark>. Your app connects to it using an <mark>MCP Client</mark>. Done.</p>
   <div class="interactive-diagram">
-    <p style="color:var(--text-dim);margin-bottom:1rem;font-size:0.9rem;">hover over each box to see what it does</p>
+    <p class="diagram-hint-hover" style="color:var(--text-dim);margin-bottom:1rem;font-size:0.9rem;">hover over each box to see what it does</p>
+    <p class="diagram-hint-tap" style="color:var(--text-dim);margin-bottom:1rem;font-size:0.9rem;">tap each box to see what it does</p>
     <div class="diagram-row">
       <div class="diagram-box you" title="Your code — the app you're building">🧑‍💻 Your App</div>
       <span class="diagram-arrow">&rarr;</span>
